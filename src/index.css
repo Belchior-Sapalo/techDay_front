@@ -1,0 +1,5 @@
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --header-color: rgba(0, 57, 57, 0.591);
+  --footer-color: #161F30;
+}

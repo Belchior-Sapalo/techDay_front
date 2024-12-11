@@ -1,0 +1,26 @@
+#header-container {
+  padding: 8px;
+  border-bottom: 1px solid rgba(0, 23, 23, 0.105);
+  position: fixed;
+  width: 100%;
+  background-color: white;
+  padding-left: 160px;
+  padding-right: 160px;
+  z-index: 999;
+  display: flex;
+  justify-content: space-between;
+}
+
+#header-container h5 {
+  color: #217373;
+}
+
+
+@media screen and (max-width: 700px) {
+  #header-container {
+    justify-content: center;
+  }
+ #logo-container{
+  display: none;
+ }
+}

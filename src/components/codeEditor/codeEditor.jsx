@@ -42,15 +42,30 @@ const CodeEditor = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false); // Estado para o minimizador
   const [wasClicked, setWasClicked] = useState(false);
-  const baseUrl = "http://localhost:8080/problem";
+  const baseUrl = "http://localhost:8080/problems";
+  const [timer, setTimer] = useState(null); // Estado do cronômetro
+  const [remainingTime, setRemainingTime] = useState(5);
 
   useEffect(() => {
-    if (Cookies.get("currentProblem")) {
-      handleGetCurrentProblem();
-    } else {
-      handleGetFirstProblem();
+    if (remainingTime > 0) {
+      const interval = setInterval(() => {
+        setRemainingTime((prevTime) => prevTime - 1);
+      }, 1000);
+      return () => clearInterval(interval);
+    } else if (remainingTime === 0) {
+      notifyError("O tempo acabou!");
     }
+  }, [remainingTime]);
+
+  useEffect(() => {
+    handleGetFirstProblem();
   }, []);
+
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${minutes}:${secs < 10 ? "0" : ""}${secs}`;
+  };
 
   function Problems() {
     return (
@@ -66,6 +81,11 @@ const CodeEditor = () => {
             ) : (
               <></>
             )}
+            <div id="timer-container">
+              {remainingTime != null && (
+                <h5>Tempo restante: {formatTime(remainingTime)}</h5>
+              )}
+            </div>
             <button
               variant="secondary"
               onClick={() => setIsMinimized(!isMinimized)}
@@ -77,6 +97,7 @@ const CodeEditor = () => {
                 <FaMinimize size={14} />
               )}
             </button>
+
           </Card.Header>
           {!isMinimized && (
             <>
@@ -117,6 +138,7 @@ const CodeEditor = () => {
       setCurrentProblem(data);
       Cookies.set("currentProblem", data.sequence);
       Cookies.set("currentProblemId", data.id);
+      setRemainingTime(data.durationTime)
     } catch (error) {
       console.error("Erro ao buscar o primeiro problema", error);
     } finally {
@@ -191,6 +213,7 @@ const CodeEditor = () => {
       setIsLoading(false);
     }
   }
+
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
@@ -327,9 +350,9 @@ const CodeEditor = () => {
   }
 
   function handleShowLast() {
-    setIsAnTestResponse(true)
-    setResponse({result: Cookies.get("lastMsg")})
-    handleShow()
+    setIsAnTestResponse(true);
+    setResponse({ result: Cookies.get("lastMsg") });
+    handleShow();
   }
 
   //setTimeout(() => Cookies.set("lastMsg", ""), 1000)
@@ -418,9 +441,7 @@ const CodeEditor = () => {
                 ) : (
                   <Button
                     onClick={() => handleSubmitCode()}
-                    disabled={
-                      requestBody.codeBody.length === 0
-                    }
+                    disabled={requestBody.codeBody.length === 0}
                   >
                     Enviar
                   </Button>
@@ -430,9 +451,7 @@ const CodeEditor = () => {
             <ButtonGroup className="me-2" aria-label="scond group">
               <Button
                 onClick={() => handleShowLast()}
-                disabled={
-                  !Cookies.get("lastMsg")
-                }
+                disabled={!Cookies.get("lastMsg")}
               >
                 Resultado do teste
               </Button>

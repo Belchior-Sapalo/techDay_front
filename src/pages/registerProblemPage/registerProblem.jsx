@@ -1,9 +1,9 @@
-import Cookies from "js-cookie";
 import React, { useState } from "react";
 import { Form, Button, Container, Row, Col, Card } from "react-bootstrap";
 import { notifyError, notifySuccess } from "../../components/utils/notifier";
+import { ApiServices } from "../../components/utils/apiServices";
 
-const RegisterProblem = () => {
+export default function RegisterProblem(){
   const [problem, setProblem] = useState({
     title: "",
     description: "",
@@ -40,26 +40,20 @@ const RegisterProblem = () => {
       })
   }
 
-  const handleSubmit = async (e) => {
+  const handleRegisterProblem = async (e) => {
     e.preventDefault();
-    const url = "http://localhost:8080/problem/register"
-    setIsLoading(true)
+    if (problem.testCases.length === 0){
+      notifyError("Precisa inserir casos de testes!")
+      return;
+    }
     try {
-        const response = await fetch(url, {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${Cookies.get("token")}`,
-                "Content-type": "application/json"
-            },
-            body: JSON.stringify(problem)
-        })
-
-        if (response.ok){
-            notifySuccess("Problema registrado")
-            handleCleanStates()
+      setIsLoading(true)
+        const res = await ApiServices.handleRegisterProblem(problem)
+        if (res.ok){
+          handleCleanStates()
+          notifySuccess("Problema cadastrado")
         }else{
-            const data = await response.json()
-            throw new Error(data.msg)
+          throw new Error(res.msg)
         }
     } catch (error) {
         notifyError(`Falha ao registrar problema: ${error.message}`)
@@ -75,7 +69,7 @@ const RegisterProblem = () => {
           <Card>
             <Card.Body>
               <Card.Title>Registrar Problema</Card.Title>
-              <Form onSubmit={handleSubmit}>
+              <Form onSubmit={handleRegisterProblem}>
                 <Form.Group controlId="problemTitle" className="mb-3">
                   <Form.Label>Título do Problema</Form.Label>
                   <Form.Control
@@ -185,4 +179,3 @@ const RegisterProblem = () => {
   );
 };
 
-export default RegisterProblem;

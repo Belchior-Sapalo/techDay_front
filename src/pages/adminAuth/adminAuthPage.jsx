@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./home.css";
+import "./adminAuthPage.css";
 import {
   Form,
   Button,
@@ -12,7 +12,7 @@ import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import { ApiServices } from "../../components/utils/apiServices";
 
-export default function Home() {
+export default function AdminAuthPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [creadentials, setCreadentials] = useState({
     bi: "",
@@ -33,19 +33,19 @@ export default function Home() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      creadentials.password = creadentials.bi;
+      creadentials.isAdmin = true
       const res = await ApiServices.handleLogin(creadentials)
 
       if (res.ok){
         Cookies.set("token", res.token);
         Cookies.set("role", res.role)
-        navigate("codingPage");
+        navigate("/dashboard");
       }else{
         throw new Error(res.msg)
       }
     } catch (error) {
       setIsError(true);
-      setApiMessage("Esse número de BI não existe");
+      setApiMessage(error.message);
     }finally{
       setIsLoading(false)
       setTimeout(() => setApiMessage(""), 2000);
@@ -56,7 +56,7 @@ export default function Home() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      creadentials.password = creadentials.bi;
+      creadentials.isAdmin = true;
       const res = await ApiServices.handleRegister(creadentials)
       if (res.ok){
         handleClose();
@@ -104,6 +104,17 @@ export default function Home() {
               required
             />
           </Form.Group>
+          <Form.Group className="mb-3" controlId="formBasicPass">
+            <Form.Control
+              type="password"
+              placeholder="Digite sua senha"
+              value={creadentials.password}
+              onChange={(e) =>
+                setCreadentials({ ...creadentials, password: e.target.value })
+              }
+              required
+            />
+          </Form.Group>
 
           <Button
             variant="primary"
@@ -129,14 +140,14 @@ export default function Home() {
           <p className="mt-2 mb-0" id="register-btn" onClick={handleShow}>
             Não tem uma conta? <span style={{color: "green"}}>Registre-se</span>
           </p>
-          <p style={{cursor: "pointer"}} className="mt-2 mb-0" onClick={() => navigate("/admin")}>
-            Administrador
+          <p style={{cursor: "pointer"}} className="mt-2 mb-0" onClick={() => navigate("/")}>
+            Competidor
           </p>
         </Form>
       </div>
       <Modal show={show} onHide={handleClose}>
         <Modal.Header closeButton>
-          <Modal.Title>Registre-se como competidor</Modal.Title>
+          <Modal.Title>Registre-se como administrador</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={handleRegister}>
@@ -158,7 +169,7 @@ export default function Home() {
               />
             </Form.Group>
 
-            <Form.Group className="mb-3" controlId="formBasicPassword">
+            <Form.Group className="mb-3" controlId="formBasicName">
               <Form.Label>Nome</Form.Label>
               <Form.Control
                 type="text"
@@ -166,6 +177,18 @@ export default function Home() {
                 value={creadentials.name}
                 onChange={(e) =>
                   setCreadentials({ ...creadentials, name: e.target.value })
+                }
+                required
+              />
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="formBasicPassword">
+              <Form.Label>Senha</Form.Label>
+              <Form.Control
+                type="password"
+                placeholder="Digite sua senha"
+                value={creadentials.password}
+                onChange={(e) =>
+                  setCreadentials({ ...creadentials, password: e.target.value })
                 }
                 required
               />

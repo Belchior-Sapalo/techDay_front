@@ -7,7 +7,11 @@ import Home from './pages/home/home'
 import ServerErrorPage from './pages/serverErrorPage/serverErrorPage'
 import CoderPage from './pages/coderPage/coderPage';
 import PrivateRoute from './components/privateRoute/privateRoute';
+import DashBoard from './pages/dashboard/dashBoard'
+import AdminAuthPage from './pages/adminAuth/adminAuthPage';
+import AdminRoute from './components/privateRoute/adminRoute';
 import RegisterProblem from './pages/registerProblemPage/registerProblem';
+import ManageProblems from './pages/manageProblems/manageProblems';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -15,8 +19,12 @@ createRoot(document.getElementById('root')).render(
       <Routes>
         <Route element={<App/>}>
           <Route path="/" element={<Home/>}/>
+          <Route path="/admin" element={<AdminAuthPage/>}/>
+          <Route path="/dashboard" element={<AdminRoute><DashBoard/></AdminRoute>}>
+              <Route path='registerProblem' index element={<AdminRoute><RegisterProblem/></AdminRoute>}/>
+              <Route path='manageProblems' index element={<AdminRoute><ManageProblems/></AdminRoute>}/>
+          </Route>
           <Route path="/codingPage" element={<PrivateRoute><CoderPage/></PrivateRoute>}/>
-          <Route path="/register" element={<PrivateRoute><RegisterProblem/></PrivateRoute>}/>
           <Route path="/serverError" element={<ServerErrorPage/>}/>
         </Route>
       </Routes>

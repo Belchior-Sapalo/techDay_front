@@ -1,0 +1,15 @@
+#home-page {
+  height: 150vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#auth-form{
+  background-color: red;
+}
+
+#register-btn{
+  cursor: pointer;
+  padding: 5px 0;
+}

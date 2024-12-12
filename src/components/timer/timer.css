@@ -1,0 +1,11 @@
+#timer-container {
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    color: #0A84FF; /* Cor de destaque */
+    background-color: #f9f9f9; /* Fundo leve */
+    border: 1px solid #ddd; /* Borda suave */
+    border-radius: 8px; /* Bordas arredondadas */
+    padding: 5px 8PX;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra leve */
+  }

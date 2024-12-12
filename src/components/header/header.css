@@ -1,14 +1,13 @@
 #header-container {
-  padding: 8px;
+  padding: 8px 100px;
   border-bottom: 1px solid rgba(0, 23, 23, 0.105);
   position: fixed;
   width: 100%;
   background-color: white;
-  padding-left: 160px;
-  padding-right: 160px;
   z-index: 999;
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
 
 #header-container h5 {
@@ -16,10 +15,20 @@
 }
 
 
+#timer-container {
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  color: #0A84FF; /* Cor de destaque */
+  background-color: #f9f9f9; /* Fundo leve */
+  border: 1px solid #ddd; /* Borda suave */
+  border-radius: 8px; /* Bordas arredondadas */
+  padding: 5px 8PX;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra leve */
+}
+
+
 @media screen and (max-width: 700px) {
-  #header-container {
-    justify-content: center;
-  }
  #logo-container{
   display: none;
  }

@@ -1,15 +1,21 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Table, Button, Container, Spinner } from "react-bootstrap";
 import { ApiServices } from "../../components/utils/apiServices";
-import { notifyError } from "../../components/utils/notifier";
+import { notifyError, notifySuccess } from "../../components/utils/notifier";
+import Timer from '../../components/timer/timer'
+import { AppContext } from "../../components/context/appContext";
 import Cookies from "js-cookie";
 
 export default function ManageProblems() {
   const [problems, setProblems] = useState([]);
   const [isLoading, setisLoading] = useState(true);
+  const [wasClicked, setWasClicked] = useState(false);
+  const { setRemainingTime } =
+    useContext(AppContext);
 
   useEffect(() => {
     fetchProblems();
+    handleGetCurrentProblem()
   }, []);
 
   const fetchProblems = async () => {
@@ -18,7 +24,7 @@ export default function ManageProblems() {
       if (res.ok) {
         setProblems(res.problemList);
       } else {
-        throw new Error(res.msg);
+        throw new Error();
       }
     } catch (error) {
       notifyError("Erro ao buscar problemas:", error.message);
@@ -30,9 +36,10 @@ export default function ManageProblems() {
   const handleUpdateVisibility = async (problemId) => {
     try {
       setisLoading(true)
-      const res = await ApiServices.handleUpdateProblemVisibility(problemId); // Ajuste a URL
+      const res = await ApiServices.handleUpdateProblemVisibility(problemId);
       if (res.ok) {
        await fetchProblems()
+       await handleGetCurrentProblem()
       }else{
         throw new Error(res.msg)
       }
@@ -52,16 +59,51 @@ export default function ManageProblems() {
     );
   }
 
-  return (
-    <Container>
-      <h2 className="my-4">Lista de Problemas</h2>
-      <Table striped bordered hover>
+  async function handleFinishChalange(){
+    if (wasClicked){
+      try {
+        setisLoading(true)
+        const res = await ApiServices.handleFinishChalange()
+        if (res.ok) {
+         await fetchProblems()
+         notifySuccess("Desafio terminado")
+         setRemainingTime(null)
+        }else{
+          throw new Error(res.msg)
+        }
+      } catch (error) {
+        notifyError("Erro ao terminar desafio:", error.message);
+      } finally {
+        setisLoading(false)
+      }
+    }else{
+      setWasClicked(true)
+      setTimeout(() => setWasClicked(false), 2000)
+    }
+  }
+
+  async function handleGetCurrentProblem(){
+    const res = await ApiServices.handleGetNextProblem();
+      if (res.ok) {
+        setRemainingTime(res.problem.durationTime * 60);
+      } else {
+        Cookies.remove("currentProblem");
+      }
+  }
+
+  return (  
+    <div>
+      <div className="mt-2"><Timer/></div>
+      <h2 className="mb-4 mt-4">Lista de Problemas</h2>
+      <Table striped bordered responsive>
         <thead>
           <tr>
             <th>#</th>
             <th>Título</th>
             <th>Descrição</th>
+            <th>Duração</th>
             <th>Ordem</th>
+            <th>Pontos</th>
             <th>Visível</th>
             <th>Ações</th>
           </tr>
@@ -69,11 +111,13 @@ export default function ManageProblems() {
         <tbody>
           {problems.map((problem, index) => (
             <tr key={problem.id}>
-              <td>{index + 1}</td>
-              <td>{problem.title}</td>
-              <td>{problem.description}</td>
-              <td>{problem.sequence}</td>
-              <td>{problem.visible ? "Sim" : "Não"}</td>
+              <td style={{ whiteSpace: "nowrap" }}>{index + 1}</td>
+              <td style={{ whiteSpace: "nowrap" }}>{problem.title}</td>
+              <td style={{ whiteSpace: "nowrap" }}>{problem.description}</td>
+              <td style={{ whiteSpace: "nowrap" }}>{problem.durationTime} min</td>
+              <td style={{ whiteSpace: "nowrap" }}>{problem.sequence}</td>
+              <td style={{ whiteSpace: "nowrap" }}>{problem.points}</td>
+              <td style={{ whiteSpace: "nowrap" }}>{problem.visible ? "Sim" : "Não"}</td>
               <td>
                 {!problem.visible && (
                   <Button
@@ -81,7 +125,7 @@ export default function ManageProblems() {
                     onClick={() => handleUpdateVisibility(problem.id)}
                     disabled={isLoading}
                   >
-                    Tornar Visível
+                    Mostrar
                   </Button>
                 )}
               </td>
@@ -89,6 +133,7 @@ export default function ManageProblems() {
           ))}
         </tbody>
       </Table>
-    </Container>
+      <Button onClick={() => handleFinishChalange()} variant={wasClicked ? "danger": "primary"} className="mt-4">{wasClicked ? "Terminar desafio?" : "Terminar"}</Button>
+    </div>
   );
 }

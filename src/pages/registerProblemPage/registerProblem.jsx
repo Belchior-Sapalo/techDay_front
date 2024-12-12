@@ -9,6 +9,7 @@ export default function RegisterProblem(){
     description: "",
     sequence: "",
     points: "",
+    durationTime: "",
     testCases: [],
   });
   const [isLoading, setIsLoading] = useState(false)
@@ -32,12 +33,13 @@ export default function RegisterProblem(){
 
   function handleCleanStates(){
     setProblem({
-        title: "",
-        description: "",
-        sequence: "",
-        points: "",
-        testCases: [],
-      })
+      title: "",
+      description: "",
+      sequence: "",
+      points: "",
+      durationTime: "",
+      testCases: [],
+    })
   }
 
   const handleRegisterProblem = async (e) => {
@@ -106,6 +108,18 @@ export default function RegisterProblem(){
                     value={problem.sequence}
                     onChange={(e) =>
                       setProblem({ ...problem, sequence: e.target.value })
+                    }
+                    required
+                  />
+                </Form.Group>
+                <Form.Group controlId="problemDuration" className="mb-3">
+                  <Form.Label>Duração</Form.Label>
+                  <Form.Control
+                    type="number"
+                    placeholder="Duração"
+                    value={problem.durationTime}
+                    onChange={(e) =>
+                      setProblem({ ...problem, durationTime: e.target.value })
                     }
                     required
                   />

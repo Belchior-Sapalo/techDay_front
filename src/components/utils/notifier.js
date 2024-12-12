@@ -1,9 +1,11 @@
 import { toast, Bounce } from 'react-toastify';
+import './notifier.css'
 
 export function notifyError(msg){
     toast.error(msg, {
-      position: "top-right",
-      autoClose: 1000,
+      position: "top-center",
+      closeButton: false,
+      autoClose: 2000,
       hideProgressBar: false,
       closeOnClick: true,
       pauseOnHover: true,
@@ -11,13 +13,15 @@ export function notifyError(msg){
       progress: undefined,
       theme: "light",
       transition: Bounce,
+      style: {whiteSpace: "nowrap"}
     });
 }
 
 export function notifySuccess(msg){
     toast.success(msg, {
-      position: "top-right",
-      autoClose: 3000,
+      position: "top-center",
+      closeButton: false,
+      autoClose: 2000,
       hideProgressBar: false,
       closeOnClick: true,
       pauseOnHover: true,
@@ -25,6 +29,7 @@ export function notifySuccess(msg){
       progress: undefined,
       theme: "light",
       transition: Bounce,
+      style: {whiteSpace: "nowrap"}
     });
   }
 

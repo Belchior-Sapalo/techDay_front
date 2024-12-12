@@ -6,6 +6,8 @@ export const AppContext = createContext();
 
 export const AppProvider = ({children}) => {
     const [user, setUser] = useState({})
+    const [remainingTime, setRemainingTime] = useState(null);
+    const [durationTimeOut, setDurationTimeOut] = useState(false);
     const navigate = useNavigate()
 
     const handleGetCompetitorName = ()=>{
@@ -32,7 +34,7 @@ export const AppProvider = ({children}) => {
 
 
     return (
-        <AppContext.Provider value={{handleGetCompetitorName, user}}>
+        <AppContext.Provider value={{handleGetCompetitorName, user, remainingTime, setRemainingTime, durationTimeOut, setDurationTimeOut}}>
             {children}
         </AppContext.Provider>
     )

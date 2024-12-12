@@ -17,7 +17,6 @@ export const ApiServices = {
       },
       body: JSON.stringify(creadentials),
     });
-
     const data = await res.json();
     if (res.ok) {
       response.ok = true;
@@ -149,6 +148,79 @@ export const ApiServices = {
     } else {
       response.ok = false;
       response.msg = data.message;
+    }
+    return response;
+  },
+ handleGetNextProblem: async ()  => {
+    const url = `${API_BASE_URL}/problems/next`;
+
+    const res = await fetch(url, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${Cookies.get("token")}`,
+      },
+    })
+
+    const data = await res.json()
+    if (res.ok){
+      response.ok = true
+      response.problem = data 
+    }else{
+      response.ok = false
+      response.msg = data.message
+    }
+    return response;
+  },
+  handleCheckIfFirstProblemIsVisible: async ()  => {
+    const url = `${API_BASE_URL}/problems/next`;
+
+    const res = await fetch(url, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${Cookies.get("token")}`,
+      },
+    })
+
+    if (res.ok){
+      response.ok = true
+    }else{
+      response.ok = false
+    }
+    return response;
+ },
+  handleCheckIfNextProblemIsReady: async ()  => {
+     const url = `${API_BASE_URL}/problems/verify/${Cookies.get("currentProblem")}`;
+ 
+     const res = await fetch(url, {
+       method: "GET",
+       headers: {
+         Authorization: `Bearer ${Cookies.get("token")}`,
+       },
+     })
+ 
+     if (res.ok){
+       response.ok = true
+     }else{
+       response.ok = false
+     }
+     return response;
+  },
+  handleFinishChalange: async () => {
+    const url = `${API_BASE_URL}/problems/finish`;
+
+    const res = await fetch(url, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${Cookies.get("token")}`,
+      },
+    })
+
+    if (res.ok){
+      response.ok = true
+    }else{
+      response.ok = false
+      const data = await res.json()
+      response.msg = data.message
     }
     return response;
   }

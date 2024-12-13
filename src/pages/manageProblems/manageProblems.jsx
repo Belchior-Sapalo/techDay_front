@@ -93,7 +93,7 @@ export default function ManageProblems() {
 
   return (  
     <div>
-      <div className="mt-2"><Timer/></div>
+      <div className="mt-2"><Timer areInAdminRoute={true}/></div>
       <h2 className="mb-4 mt-4">Lista de Problemas</h2>
       <Table striped bordered responsive>
         <thead>

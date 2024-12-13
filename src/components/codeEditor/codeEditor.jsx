@@ -6,6 +6,7 @@ import { java } from "@codemirror/lang-java";
 import { cpp } from "@codemirror/lang-cpp";
 import "../codeEditor/codeEditor.css";
 import { notifyError } from "../utils/notifier";
+import { useNavigate } from "react-router-dom";
 import ModalComponent from "../../components/modal/modal";
 import {
   Spinner,
@@ -21,6 +22,7 @@ import { FaMaximize, FaMinimize } from "react-icons/fa6";
 import { AppContext } from "../context/appContext";
 import { ApiServices } from "../utils/apiServices";
 
+
 const CodeEditor = () => {
   const [language, setLanguage] = useState(javascript);
   const [response, setResponse] = useState({});
@@ -35,21 +37,27 @@ const CodeEditor = () => {
     token: Cookies.get("token"),
     inputs: "",
   });
-  const { handleGetCompetitorName, setRemainingTime, remainingTime, durationTimeOut} =
-    useContext(AppContext);
+  const {
+    handleGetCompetitorInfo,
+    setRemainingTime,
+    remainingTime,
+    durationTimeOut,
+    setDurationTimeOut
+  } = useContext(AppContext);
   const [currentProblem, setCurrentProblem] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(false); // Estado para o minimizador
+  const [isMinimized, setIsMinimized] = useState(false);
   const [wasClicked, setWasClicked] = useState(false);
   const [started, setStarted] = useState(false);
+  const [finished, setFinished] = useState(false)
   const [checkInterval, setCheckInterval] = useState(1000);
-  const [isChecking, setIsChecking] = useState(false); 
+  const [isChecking, setIsChecking] = useState(false);
+  const navigate = useNavigate()
+
 
   useEffect(() => {
-    handleGetCompetitorName();
-    handleGetNextProblem();
+    handleGetCompetitorInfo();
   }, []);
-
 
   useEffect(() => {
     let timeoutId;
@@ -75,6 +83,7 @@ const CodeEditor = () => {
   useEffect(() => {
     if (!isChecking) return; // Não inicia o intervalo se isChecking for falso
 
+    if (finished) return;
     const intervalId = setInterval(async () => {
       try {
         let res;
@@ -82,6 +91,11 @@ const CodeEditor = () => {
           res = await ApiServices.handleCheckIfFirstProblemIsVisible();
         } else {
           res = await ApiServices.handleCheckIfNextProblemIsReady();
+          const response = await ApiServices.handleCheckIfChalangeIsFinished()
+          console.log(`Finished: ${response.finished}`)
+          if (response.finished === true) {
+            navigate("/resultados")
+          };
         }
 
         if (res.ok) {
@@ -92,15 +106,14 @@ const CodeEditor = () => {
           }
         }
       } catch (error) {
-        console.error("Erro ao verificar problema:", error);
+        alert("Erro ao verificar problema:", error);
       }
     }, checkInterval);
 
     // Limpa o intervalo ao desmontar ou reiniciar
     return () => clearInterval(intervalId);
-  }, [checkInterval, isChecking, started]);
-  
-  
+  }, [checkInterval, isChecking, started, finished]);
+
   //setTimeout(() => Cookies.remove("started"), 1000)
 
   function Problems() {
@@ -135,7 +148,7 @@ const CodeEditor = () => {
               <Card.Body>
                 {isLoading ? (
                   <LoadingComponent operation="Carregando problema..." />
-                ) : currentProblem != null ? (
+                ) : currentProblem !== null ? (
                   <div>
                     <h6>{currentProblem.title}</h6>
                     <p className="problem-description">
@@ -144,13 +157,11 @@ const CodeEditor = () => {
                   </div>
                 ) : (
                   <div>
-                    {
-                      Cookies.get("started") ? (
-                        <h6>Parabéns por completar o desafio!</h6>
-                      ): (
-                        <h6>Se prepare, logo começamos!</h6>
-                      )
-                    }
+                    {Cookies.get("started") ? (
+                      <h6>Parabéns por completar o desafio!</h6>
+                    ) : (
+                      <h6>Se prepare, logo começamos!</h6>
+                    )}
                   </div>
                 )}
               </Card.Body>
@@ -170,11 +181,10 @@ const CodeEditor = () => {
         Cookies.set("currentProblem", res.problem.sequence);
         Cookies.set("currentProblemId", res.problem.id);
         setRemainingTime(res.problem.durationTime * 60);
-        setIsLoading(false);
-        Cookies.remove("sent")
-        setStarted(true)
-        Cookies.set("started", true)
-      (false)
+        Cookies.remove("sent");
+        setStarted(true);
+        setDurationTimeOut(false)
+        Cookies.set("started", true);
       } else {
         setCurrentProblem(null);
         Cookies.remove("currentProblem");
@@ -251,6 +261,10 @@ const CodeEditor = () => {
   };
 
   async function handleSubmitCode() {
+    if (durationTimeOut === true){
+      notifyError("Seu tempo acabou!");
+      return;
+    }
     if (requestBody.codeBody.length === 0) {
       notifyError("Insira o código!");
       return;
@@ -273,7 +287,7 @@ const CodeEditor = () => {
           setResponse(res.resObj);
           setIsAnTestResponse(false);
           handleShow();
-          handleGetCompetitorName();
+          handleGetCompetitorInfo();
           Cookies.set("sent", true);
         } else {
           throw new Error(res.msg);
@@ -300,6 +314,10 @@ const CodeEditor = () => {
       notifyError("Seleccione uma linguagem!");
       return;
     }
+    // if (requestBody.inputs.length === 0) {
+    //   notifyError("Insira entradas de teste!");
+    //   return;
+    // }
     try {
       setIsLoadingTest(true);
       const res = await ApiServices.handleTestCode(requestBody);
@@ -326,6 +344,14 @@ const CodeEditor = () => {
   }
 
   //setTimeout(() => Cookies.set("lastMsg", ""), 1000)
+
+  function disableButton(){
+    return isLoadingTest ||
+    isLoadingSubmit ||
+    Cookies.get("currentProblem") === null ||
+    requestBody.codeBody.length === 0 ||
+    durationTimeOut
+  }
 
   return (
     <div id="code-editor-container" className="pt-4 container">
@@ -364,12 +390,7 @@ const CodeEditor = () => {
                 id="first-btn"
                 onClick={() => handleTestCode()}
                 disabled={
-                  isLoadingTest ||
-                  isLoadingSubmit ||
-                  Cookies.get("currentProblem") === null ||
-                  requestBody.codeBody.length === 0 ||
-                  durationTimeOut
-          
+                  disableButton()
                 }
               >
                 {isLoadingTest ? (
@@ -392,12 +413,7 @@ const CodeEditor = () => {
                   <Button
                     onClick={() => handleSubmitCode()}
                     disabled={
-                      isLoadingTest ||
-                      isLoadingSubmit ||
-                      Cookies.get("currentProblem") == null ||
-                      requestBody.codeBody.length === 0 ||
-                      durationTimeOut
-              
+                      disableButton()
                     }
                     variant="danger"
                   >
@@ -420,8 +436,7 @@ const CodeEditor = () => {
                   <Button
                     onClick={() => handleSubmitCode()}
                     disabled={
-                      requestBody.codeBody.length === 0 || 
-                      durationTimeOut 
+                      disableButton()
                     }
                   >
                     Enviar
@@ -434,8 +449,7 @@ const CodeEditor = () => {
                 onClick={() => handleShowLast()}
                 disabled={
                   !Cookies.get("lastMsg") || 
-                  durationTimeOut
-          
+                  disableButton()
               }
               >
                 Resultado do teste

@@ -12,7 +12,7 @@ export default function Header() {
           <span>&lt;&gt;</span>TechDay<span>&lt;/&gt;</span>
         </h5>
       </div>
-        <Timer remainingTime={10 * 60}/>
+        <Timer />
       <h5>
         {user.name}: {user.score}
       </h5>

@@ -4,18 +4,19 @@ import { AppContext } from '../context/appContext';
 import { notifyError } from '../utils/notifier';
 import Cookies from 'js-cookie';
 
-export default function Timer() {
+export default function Timer({areInAdminRoute}) {
     const { setRemainingTime, remainingTime, setDurationTimeOut } = useContext(AppContext);
     const [notified, setNotified] = useState(false);
 
     useEffect(() => {
         if (remainingTime > 0) {
+          setNotified(false)
           const interval = setInterval(() => {
             setRemainingTime((prevTime) => Math.max(prevTime - 1, 0));
           }, 1000);
           return () => clearInterval(interval);
         } else if (remainingTime === 0 && !notified) {
-          notifyError("O tempo acabou!");
+          if (!areInAdminRoute) notifyError("O tempo acabou!");
           Cookies.remove("sent")
           setDurationTimeOut(true);
           setNotified(true);

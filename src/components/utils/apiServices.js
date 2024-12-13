@@ -1,7 +1,12 @@
-const API_BASE_URL = "http://localhost:8080";
-const response = { ok: false, msg: "" };
 import Cookies from "js-cookie";
+const API_BASE_URL = "http://localhost:8080";
+//const API_BASE_URL = "http://10.42.0.115:8080";
+const response = { ok: false, msg: "" };
+
 export const ApiServices = {
+  getUrl: () => {
+    return API_BASE_URL;
+  },
   isAdmin: () => {
     return Cookies.get("token") && Cookies.get("role") === "ADMIN";
   },
@@ -27,6 +32,27 @@ export const ApiServices = {
       response.msg = creadentials.isAdmin
         ? "Credenciais inválidas"
         : data.message;
+    }
+    return response;
+  },
+  handleGetCompetitorInfo: async () =>{
+    const url = `${API_BASE_URL}/competitor/info`;
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+        "Authorization": `Bearer ${Cookies.get("token")}`
+      },
+      body: JSON.stringify({token: Cookies.get("token")})
+    })
+
+    const data = await res.json();
+    if (res.ok) {
+      response.ok = true;
+      response.user = {name: data.name, score: data.score};
+    } else {
+      response.ok = false;
+      response.msg = data.message;
     }
     return response;
   },
@@ -151,7 +177,7 @@ export const ApiServices = {
     }
     return response;
   },
- handleGetNextProblem: async ()  => {
+  handleGetNextProblem: async ()  => {
     const url = `${API_BASE_URL}/problems/next`;
 
     const res = await fetch(url, {
@@ -160,7 +186,6 @@ export const ApiServices = {
         Authorization: `Bearer ${Cookies.get("token")}`,
       },
     })
-
     const data = await res.json()
     if (res.ok){
       response.ok = true
@@ -180,8 +205,6 @@ export const ApiServices = {
         Authorization: `Bearer ${Cookies.get("token")}`,
       },
     })
-
-    console.log("verificou primeiro")
     if (res.ok){
       response.ok = true
     }else{
@@ -199,7 +222,6 @@ export const ApiServices = {
        },
      })
  
-    console.log("verificou proximo")
      if (res.ok){
        response.ok = true
      }else{
@@ -223,6 +245,46 @@ export const ApiServices = {
       response.ok = false
       const data = await res.json()
       response.msg = data.message
+    }
+    return response;
+  },
+  handleCheckIfChalangeIsFinished: async () => {
+    const url = `${API_BASE_URL}/problems/finished`;
+
+    const res = await fetch(url, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${Cookies.get("token")}`,
+      },
+    })
+
+    const data = await res.json()
+    if (res.ok){
+      response.ok = true
+      response.finished = data
+    }else{
+      response.ok = false
+      response.msg = data.message
+    }
+    return response;
+  },
+  handleGetChallengeResults: async () => {
+    const url = `${API_BASE_URL}/competitor/results`;
+    const res = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${Cookies.get("token")}`
+      }
+    })
+
+    const data = await res.json();
+    console.log(data)
+    if (res.ok) {
+      response.ok = true;
+      response.competitorList = data
+    } else {
+      response.ok = false;
+      response.msg = data.message;
     }
     return response;
   }

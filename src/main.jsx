@@ -12,6 +12,7 @@ import AdminAuthPage from './pages/adminAuth/adminAuthPage';
 import AdminRoute from './components/privateRoute/adminRoute';
 import RegisterProblem from './pages/registerProblemPage/registerProblem';
 import ManageProblems from './pages/manageProblems/manageProblems';
+import ChallengeResults from './pages/resultsPage/results';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -25,6 +26,7 @@ createRoot(document.getElementById('root')).render(
               <Route path='manageProblems' index element={<AdminRoute><ManageProblems/></AdminRoute>}/>
           </Route>
           <Route path="/codingPage" element={<PrivateRoute><CoderPage/></PrivateRoute>}/>
+          <Route path="/resultados" element={<PrivateRoute><ChallengeResults/></PrivateRoute>}/>
           <Route path="/serverError" element={<ServerErrorPage/>}/>
         </Route>
       </Routes>

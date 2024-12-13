@@ -20,7 +20,6 @@ import LoadingComponent from "../loadingComponent/loadingComponent";
 import { FaMaximize, FaMinimize } from "react-icons/fa6";
 import { AppContext } from "../context/appContext";
 import { ApiServices } from "../utils/apiServices";
-import { Client } from "@stomp/stompjs";
 
 const CodeEditor = () => {
   const [language, setLanguage] = useState(javascript);
@@ -36,82 +35,72 @@ const CodeEditor = () => {
     token: Cookies.get("token"),
     inputs: "",
   });
-  const { handleGetCompetitorName, setRemainingTime, durationTimeOut } =
+  const { handleGetCompetitorName, setRemainingTime, remainingTime, durationTimeOut} =
     useContext(AppContext);
   const [currentProblem, setCurrentProblem] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false); // Estado para o minimizador
   const [wasClicked, setWasClicked] = useState(false);
+  const [started, setStarted] = useState(false);
+  const [checkInterval, setCheckInterval] = useState(1000);
+  const [isChecking, setIsChecking] = useState(false); 
 
   useEffect(() => {
     handleGetCompetitorName();
     handleGetNextProblem();
   }, []);
 
-  // useEffect(() => {
-  //   const client = new Client({
-  //     brokerURL: "ws://localhost:8080/ws", // URL do WebSocket do backend
-  //     reconnectDelay: 5000, // Tenta reconectar automaticamente
-  //     debug: (str) => console.log("WebSocket Debug: ", str),
-  //   });
-
-  //   client.onConnect = () => {
-  //     console.log("Conectado ao WebSocket!");
-
-  //     // Subscrição para verificar atualizações de problemas
-  //     client.subscribe("/topic/problems", async (message) => {
-  //       const data = message.body;
-
-  //       try {
-  //         let res;
-  //         if (!Cookies.get("started")) {
-  //           res = await ApiServices.handleCheckIfFirstProblemIsVisible();
-  //         } else {
-  //           res = await ApiServices.handleCheckIfNextProblemIsReady();
-  //         }
-
-  //         if (res.ok) {
-  //           handleGetNextProblem();
-  //         }
-  //       } catch (error) {
-  //         console.error("Erro ao processar mensagem do WebSocket:", error);
-  //       }
-  //     });
-  //   };
-
-  //   client.onStompError = (frame) => {
-  //     console.error("Erro no STOMP:", frame.headers["message"], frame.body);
-  //   };
-
-  //   client.activate();
-
-  //   return () => {
-  //     client.deactivate();
-  //   };
-  // }, []);
 
   useEffect(() => {
-    const interval = setInterval(async () => {
+    let timeoutId;
+
+    if (started) {
+      // Quando o desafio começa, aguarda o tempo restante antes de iniciar a próxima verificação
+      timeoutId = setTimeout(() => {
+        setCheckInterval(1000); // Após o tempo terminar, verifica a cada 1 segundo
+        setIsChecking(true); // Ativa o intervalo para verificar problemas
+      }, remainingTime * 1000);
+
+      setIsChecking(false); // Desativa verificações durante o tempo do problema
+    } else {
+      // Antes do desafio começar, verifica a cada 1 segundo
+      setCheckInterval(1000);
+      setIsChecking(true);
+    }
+
+    // Limpa o timeout ao desmontar ou reiniciar
+    return () => clearTimeout(timeoutId);
+  }, [started, remainingTime]);
+
+  useEffect(() => {
+    if (!isChecking) return; // Não inicia o intervalo se isChecking for falso
+
+    const intervalId = setInterval(async () => {
       try {
         let res;
-        if (!Cookies.get("started")) {
+        if (!started) {
           res = await ApiServices.handleCheckIfFirstProblemIsVisible();
         } else {
           res = await ApiServices.handleCheckIfNextProblemIsReady();
         }
-  
+
         if (res.ok) {
           handleGetNextProblem();
+
+          if (started) {
+            setIsChecking(false); // Para verificar novamente apenas após o próximo timeout
+          }
         }
       } catch (error) {
         console.error("Erro ao verificar problema:", error);
       }
-    }, 1000);
-  
-    return () => clearInterval(interval);
-  }, []);
-  
+    }, checkInterval);
 
+    // Limpa o intervalo ao desmontar ou reiniciar
+    return () => clearInterval(intervalId);
+  }, [checkInterval, isChecking, started]);
+  
+  
   //setTimeout(() => Cookies.remove("started"), 1000)
 
   function Problems() {
@@ -182,7 +171,10 @@ const CodeEditor = () => {
         Cookies.set("currentProblemId", res.problem.id);
         setRemainingTime(res.problem.durationTime * 60);
         setIsLoading(false);
+        Cookies.remove("sent")
+        setStarted(true)
         Cookies.set("started", true)
+      (false)
       } else {
         setCurrentProblem(null);
         Cookies.remove("currentProblem");
@@ -265,6 +257,10 @@ const CodeEditor = () => {
     }
     if (requestBody.language.length == 0) {
       notifyError("Seleccione uma linguagem!");
+      return;
+    }
+    if (Cookies.get("sent")) {
+      notifyError("Já enviou sua solução!");
       return;
     }
 
@@ -373,6 +369,7 @@ const CodeEditor = () => {
                   Cookies.get("currentProblem") === null ||
                   requestBody.codeBody.length === 0 ||
                   durationTimeOut
+          
                 }
               >
                 {isLoadingTest ? (
@@ -400,6 +397,7 @@ const CodeEditor = () => {
                       Cookies.get("currentProblem") == null ||
                       requestBody.codeBody.length === 0 ||
                       durationTimeOut
+              
                     }
                     variant="danger"
                   >
@@ -422,7 +420,8 @@ const CodeEditor = () => {
                   <Button
                     onClick={() => handleSubmitCode()}
                     disabled={
-                      requestBody.codeBody.length === 0 || durationTimeOut
+                      requestBody.codeBody.length === 0 || 
+                      durationTimeOut 
                     }
                   >
                     Enviar
@@ -433,7 +432,11 @@ const CodeEditor = () => {
             <ButtonGroup className="me-2" aria-label="scond group">
               <Button
                 onClick={() => handleShowLast()}
-                disabled={!Cookies.get("lastMsg") || durationTimeOut}
+                disabled={
+                  !Cookies.get("lastMsg") || 
+                  durationTimeOut
+          
+              }
               >
                 Resultado do teste
               </Button>

@@ -181,6 +181,7 @@ export const ApiServices = {
       },
     })
 
+    console.log("verificou primeiro")
     if (res.ok){
       response.ok = true
     }else{
@@ -198,6 +199,7 @@ export const ApiServices = {
        },
      })
  
+    console.log("verificou proximo")
      if (res.ok){
        response.ok = true
      }else{

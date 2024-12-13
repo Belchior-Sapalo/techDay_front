@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import './timer.css'
 import { AppContext } from '../context/appContext';
 import { notifyError } from '../utils/notifier';
+import Cookies from 'js-cookie';
 
 export default function Timer() {
     const { setRemainingTime, remainingTime, setDurationTimeOut } = useContext(AppContext);
@@ -15,6 +16,7 @@ export default function Timer() {
           return () => clearInterval(interval);
         } else if (remainingTime === 0 && !notified) {
           notifyError("O tempo acabou!");
+          Cookies.remove("sent")
           setDurationTimeOut(true);
           setNotified(true);
         }

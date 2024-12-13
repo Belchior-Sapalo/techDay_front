@@ -1,5 +1,4 @@
 import { toast, Bounce } from 'react-toastify';
-import './notifier.css'
 
 export function notifyError(msg){
     toast.error(msg, {

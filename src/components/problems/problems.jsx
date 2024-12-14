@@ -80,7 +80,7 @@ export default function Problems() {
         setCurrentProblem(res.problem);
         Cookies.set("currentProblem", res.problem.sequence);
         Cookies.set("currentProblemId", res.problem.id);
-        setRemainingTime((res.problem.durationTime / 2) * 60);
+        setRemainingTime((res.problem.durationTime) * 60);
         Cookies.remove("sent");
         setStarted(true);
         setDurationTimeOut(false);

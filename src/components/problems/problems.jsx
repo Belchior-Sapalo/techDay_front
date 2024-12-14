@@ -7,6 +7,8 @@ import { FaMaximize, FaMinimize } from "react-icons/fa6";
 import { ApiServices } from "../utils/apiServices";
 import { AppContext } from "../context/appContext";
 import { useNavigate } from "react-router-dom";
+import { notifyError } from "../utils/notifier";
+import './problems.css'
 
 export default function Problems() {
   const { setRemainingTime, remainingTime, setDurationTimeOut } =
@@ -64,13 +66,12 @@ export default function Problems() {
           }
         }
       } catch (error) {
-        alert("Erro ao verificar problema:", error);
+        notifyError(error);
       }
     }, checkInterval);
 
     return () => clearInterval(intervalId);
   }, [checkInterval, isChecking, started, finished]);
-  //setTimeout(() => Cookies.remove("started"), 1000)
   async function handleGetNextProblem() {
     try {
       setIsLoading(true);

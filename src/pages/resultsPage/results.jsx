@@ -4,23 +4,23 @@ import { ApiServices } from "../../components/utils/apiServices";
 import { FaMedal } from "react-icons/fa";
 
 const ChallengeResults = () => {
-  const [results, setResults] = useState([]); // Armazena os resultados
-  const [loading, setLoading] = useState(true); // Indica se os dados estão sendo carregados
-  const [error, setError] = useState(null); // Armazena mensagens de erro, se houver
+  const [results, setResults] = useState([]); 
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null); 
 
   useEffect(() => {
     const fetchResults = async () => {
       try {
         setLoading(true);
         setError(null);
-        const res = await ApiServices.handleGetChallengeResults(); // Substitua pelo seu método de API
+        const res = await ApiServices.handleGetChallengeResults(); 
         if (res.ok) {
           setResults(res.competitorList);
         } else {
           throw new Error("Erro ao buscar resultados");
         }
-      } catch (err) {
-        setError(err.message);
+      } catch (error) {
+        setError(error.message);
       } finally {
         setLoading(false);
       }

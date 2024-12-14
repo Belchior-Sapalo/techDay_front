@@ -11,6 +11,7 @@ export default function CoderPage() {
       <section id="coder-section">
         <CodeEditor />
       </section>
+      <Footer/>
     </main>
   );
 }

@@ -1,6 +1,7 @@
 import { createContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ApiServices } from "../utils/apiServices";
+import {notifyError} from '../utils/notifier'
 
 export const AppContext = createContext();
 
@@ -20,7 +21,7 @@ export const AppProvider = ({children}) => {
             throw new Error(res.msg)
           }
         } catch (error) {
-          alert(error.message)
+          notifyError(error.message)
       }
     }
 

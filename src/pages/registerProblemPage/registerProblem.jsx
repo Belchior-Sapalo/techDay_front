@@ -20,7 +20,7 @@ export default function RegisterProblem(){
   });
 
   const handleAddTestCase = () => {
-    if (!testCase.inputs || !testCase.expectedOutput){
+    if (testCase.inputs || !testCase.expectedOutput){
         alert("Precisa inserir as entradas e saídas")
         returnç
     }
@@ -58,7 +58,7 @@ export default function RegisterProblem(){
           throw new Error(res.msg)
         }
     } catch (error) {
-        notifyError(`Falha ao registrar problema: ${error.message}`)
+        notifyError(error.message)
     }finally{
         setIsLoading(false)
     }
@@ -116,6 +116,7 @@ export default function RegisterProblem(){
                   <Form.Label>Duração</Form.Label>
                   <Form.Control
                     type="number"
+                    min={10}
                     placeholder="Duração"
                     value={problem.durationTime}
                     onChange={(e) =>
@@ -129,6 +130,7 @@ export default function RegisterProblem(){
                   <Form.Control
                     type="number"
                     placeholder="Pontos"
+                    min={1}
                     value={problem.points}
                     onChange={(e) =>
                       setProblem({ ...problem, points: e.target.value })

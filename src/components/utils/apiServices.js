@@ -1,6 +1,6 @@
 import Cookies from "js-cookie";
-const API_BASE_URL = "http://localhost:8080";
-//const API_BASE_URL = "http://10.42.0.115:8080";
+//const API_BASE_URL = "http://localhost:8080";
+const API_BASE_URL = "http://54.217.130.114:8080";
 const response = { ok: false, msg: "" };
 
 export const ApiServices = {
@@ -22,6 +22,7 @@ export const ApiServices = {
       },
       body: JSON.stringify(creadentials),
     });
+    console.log(res)
     const data = await res.json();
     if (res.ok) {
       response.ok = true;

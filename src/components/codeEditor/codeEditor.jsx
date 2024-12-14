@@ -144,7 +144,7 @@ const CodeEditor = () => {
           throw new Error(res.msg);
         }
       } catch (error) {
-        alert(error.message);
+        notifyError(error.message);
       } finally {
         setIsLoadingSubmit(false);
       }
@@ -165,10 +165,6 @@ const CodeEditor = () => {
       notifyError("Seleccione uma linguagem!");
       return;
     }
-    // if (requestBody.inputs.length === 0) {
-    //   notifyError("Insira entradas de teste!");
-    //   return;
-    // }
     try {
       setIsLoadingTest(true);
       const res = await ApiServices.handleTestCode(requestBody);
@@ -182,7 +178,7 @@ const CodeEditor = () => {
         throw new Error(res.msg);
       }
     } catch (error) {
-      alert(error.message);
+      notifyError(error.message);
     } finally {
       setIsLoadingTest(false);
     }

@@ -44,7 +44,7 @@ export default function ManageProblems() {
         throw new Error(res.msg)
       }
     } catch (error) {
-      notifyError("Erro ao atualizar visibilidade:", error.message);
+      notifyError(error.message);
     } finally {
       setisLoading(false)
     }

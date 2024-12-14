@@ -6,22 +6,18 @@ import { java } from "@codemirror/lang-java";
 import { cpp } from "@codemirror/lang-cpp";
 import "../codeEditor/codeEditor.css";
 import { notifyError } from "../utils/notifier";
-import { useNavigate } from "react-router-dom";
 import ModalComponent from "../../components/modal/modal";
 import {
   Spinner,
   Button,
   Form,
-  Card,
   ButtonGroup,
   ButtonToolbar,
 } from "react-bootstrap";
 import Cookies from "js-cookie";
-import LoadingComponent from "../loadingComponent/loadingComponent";
-import { FaMaximize, FaMinimize } from "react-icons/fa6";
 import { AppContext } from "../context/appContext";
 import { ApiServices } from "../utils/apiServices";
-
+import Problems from "../problems/problems";
 
 const CodeEditor = () => {
   const [language, setLanguage] = useState(javascript);
@@ -40,159 +36,14 @@ const CodeEditor = () => {
   const {
     handleGetCompetitorInfo,
     setRemainingTime,
-    remainingTime,
     durationTimeOut,
-    setDurationTimeOut
+    setDurationTimeOut,
   } = useContext(AppContext);
-  const [currentProblem, setCurrentProblem] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(false);
   const [wasClicked, setWasClicked] = useState(false);
-  const [started, setStarted] = useState(false);
-  const [finished, setFinished] = useState(false)
-  const [checkInterval, setCheckInterval] = useState(1000);
-  const [isChecking, setIsChecking] = useState(false);
-  const navigate = useNavigate()
-
 
   useEffect(() => {
     handleGetCompetitorInfo();
   }, []);
-
-  useEffect(() => {
-    let timeoutId;
-
-    if (started) {
-      // Quando o desafio começa, aguarda o tempo restante antes de iniciar a próxima verificação
-      timeoutId = setTimeout(() => {
-        setCheckInterval(1000); // Após o tempo terminar, verifica a cada 1 segundo
-        setIsChecking(true); // Ativa o intervalo para verificar problemas
-      }, remainingTime * 1000);
-
-      setIsChecking(false); // Desativa verificações durante o tempo do problema
-    } else {
-      // Antes do desafio começar, verifica a cada 1 segundo
-      setCheckInterval(1000);
-      setIsChecking(true);
-    }
-
-    // Limpa o timeout ao desmontar ou reiniciar
-    return () => clearTimeout(timeoutId);
-  }, [started, remainingTime]);
-
-  useEffect(() => {
-    if (!isChecking) return; // Não inicia o intervalo se isChecking for falso
-
-    if (finished) return;
-    const intervalId = setInterval(async () => {
-      try {
-        let res;
-        if (!started) {
-          res = await ApiServices.handleCheckIfFirstProblemIsVisible();
-        } else {
-          res = await ApiServices.handleCheckIfNextProblemIsReady();
-          const response = await ApiServices.handleCheckIfChalangeIsFinished()
-          console.log(`Finished: ${response.finished}`)
-          if (response.finished === true) {
-            navigate("/resultados")
-          };
-        }
-
-        if (res.ok) {
-          handleGetNextProblem();
-
-          if (started) {
-            setIsChecking(false); // Para verificar novamente apenas após o próximo timeout
-          }
-        }
-      } catch (error) {
-        alert("Erro ao verificar problema:", error);
-      }
-    }, checkInterval);
-
-    // Limpa o intervalo ao desmontar ou reiniciar
-    return () => clearInterval(intervalId);
-  }, [checkInterval, isChecking, started, finished]);
-
-  //setTimeout(() => Cookies.remove("started"), 1000)
-
-  function Problems() {
-    return (
-      <div className="problem-container">
-        <Card id="problem-card">
-          <Card.Header className="card-header">
-            {isLoading ? (
-              <></>
-            ) : currentProblem != null ? (
-              <h4 className="problem-sequence">
-                Problema: {currentProblem.sequence}
-              </h4>
-            ) : (
-              <></>
-            )}
-
-            <button
-              variant="secondary"
-              onClick={() => setIsMinimized(!isMinimized)}
-              className="minimize-btn"
-            >
-              {isMinimized ? (
-                <FaMaximize size={14} />
-              ) : (
-                <FaMinimize size={14} />
-              )}
-            </button>
-          </Card.Header>
-          {!isMinimized && (
-            <>
-              <Card.Body>
-                {isLoading ? (
-                  <LoadingComponent operation="Carregando problema..." />
-                ) : currentProblem !== null ? (
-                  <div>
-                    <h6>{currentProblem.title}</h6>
-                    <p className="problem-description">
-                      {currentProblem.description}
-                    </p>
-                  </div>
-                ) : (
-                  <div>
-                    {Cookies.get("started") ? (
-                      <h6>Parabéns por completar o desafio!</h6>
-                    ) : (
-                      <h6>Se prepare, logo começamos!</h6>
-                    )}
-                  </div>
-                )}
-              </Card.Body>
-            </>
-          )}
-        </Card>
-      </div>
-    );
-  }
-
-  async function handleGetNextProblem() {
-    try {
-      setIsLoading(true);
-      const res = await ApiServices.handleGetNextProblem();
-      if (res.ok) {
-        setCurrentProblem(res.problem);
-        Cookies.set("currentProblem", res.problem.sequence);
-        Cookies.set("currentProblemId", res.problem.id);
-        setRemainingTime(res.problem.durationTime * 60);
-        Cookies.remove("sent");
-        setStarted(true);
-        setDurationTimeOut(false)
-        Cookies.set("started", true);
-      } else {
-        setCurrentProblem(null);
-        Cookies.remove("currentProblem");
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  }
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
@@ -261,7 +112,7 @@ const CodeEditor = () => {
   };
 
   async function handleSubmitCode() {
-    if (durationTimeOut === true){
+    if (durationTimeOut === true) {
       notifyError("Seu tempo acabou!");
       return;
     }
@@ -343,14 +194,14 @@ const CodeEditor = () => {
     handleShow();
   }
 
-  //setTimeout(() => Cookies.set("lastMsg", ""), 1000)
-
-  function disableButton(){
-    return isLoadingTest ||
-    isLoadingSubmit ||
-    Cookies.get("currentProblem") === null ||
-    requestBody.codeBody.length === 0 ||
-    durationTimeOut
+  function disableButton() {
+    return (
+      isLoadingTest ||
+      isLoadingSubmit ||
+      Cookies.get("currentProblem") === null ||
+      requestBody.codeBody.length === 0 ||
+      durationTimeOut
+    );
   }
 
   return (
@@ -389,9 +240,7 @@ const CodeEditor = () => {
               <Button
                 id="first-btn"
                 onClick={() => handleTestCode()}
-                disabled={
-                  disableButton()
-                }
+                disabled={disableButton()}
               >
                 {isLoadingTest ? (
                   <>
@@ -412,9 +261,7 @@ const CodeEditor = () => {
                 {wasClicked ? (
                   <Button
                     onClick={() => handleSubmitCode()}
-                    disabled={
-                      disableButton()
-                    }
+                    disabled={disableButton()}
                     variant="danger"
                   >
                     {isLoadingSubmit ? (
@@ -435,9 +282,7 @@ const CodeEditor = () => {
                 ) : (
                   <Button
                     onClick={() => handleSubmitCode()}
-                    disabled={
-                      disableButton()
-                    }
+                    disabled={disableButton()}
                   >
                     Enviar
                   </Button>
@@ -447,10 +292,7 @@ const CodeEditor = () => {
             <ButtonGroup className="me-2" aria-label="scond group">
               <Button
                 onClick={() => handleShowLast()}
-                disabled={
-                  !Cookies.get("lastMsg") || 
-                  disableButton()
-              }
+                disabled={!Cookies.get("lastMsg") || disableButton()}
               >
                 Resultado do teste
               </Button>

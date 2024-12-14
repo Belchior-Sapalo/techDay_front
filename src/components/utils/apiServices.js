@@ -221,7 +221,7 @@ export const ApiServices = {
          Authorization: `Bearer ${Cookies.get("token")}`,
        },
      })
- 
+
      if (res.ok){
        response.ok = true
      }else{
@@ -260,7 +260,7 @@ export const ApiServices = {
 
     const data = await res.json()
     if (res.ok){
-      response.ok = true
+      response.ok = data
       response.finished = data
     }else{
       response.ok = false

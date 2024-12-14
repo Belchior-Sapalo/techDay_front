@@ -45,7 +45,7 @@ export default function Home() {
       }
     } catch (error) {
       setIsError(true);
-      setApiMessage("Esse número de BI não existe");
+      setApiMessage(error.message);
     }finally{
       setIsLoading(false)
       setTimeout(() => setApiMessage(""), 2000);

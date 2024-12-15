@@ -1,9 +1,10 @@
-import { useState } from "react";
+import React from "react";
 import { MdCheck, MdError } from "react-icons/md";
-import {Modal} from "react-bootstrap"
-import './modal.css'
+import { Modal } from "react-bootstrap";
+import "./modal.css";
 
 function ModalComponent({ response, show, handleClose, isAnTestResponse }) {
+
   return (
     <>
       {isAnTestResponse ? (
@@ -12,7 +13,12 @@ function ModalComponent({ response, show, handleClose, isAnTestResponse }) {
             <Modal.Title>Resultados do teste</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <h6>{response.result}</h6>
+            {response.result.split("\n").map((part, index) => (
+              <React.Fragment key={index}>
+                {part}
+                <br />
+              </React.Fragment>
+            ))}
           </Modal.Body>
         </Modal>
       ) : (
@@ -26,17 +32,15 @@ function ModalComponent({ response, show, handleClose, isAnTestResponse }) {
             <h6>
               Pontos pelo problema: {response.isCorrect ? response.score : 0}
             </h6>
-            <h6>
-              Bónus: {response.bonus}
-            </h6>
+            <h6>Bónus: {response.bonus}</h6>
             <h6>Pontos total: {response.totalScore}</h6>
           </Modal.Body>
           <Modal.Footer>
             <div id="res-icon-container">
               {response.isCorrect ? (
-                <MdCheck color="green" size={25}/>
+                <MdCheck color="green" size={25} />
               ) : (
-                <MdError color="#d9534f" size={25}/>
+                <MdError color="#d9534f" size={25} />
               )}
             </div>
           </Modal.Footer>

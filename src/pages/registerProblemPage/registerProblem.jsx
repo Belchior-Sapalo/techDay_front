@@ -20,7 +20,7 @@ export default function RegisterProblem(){
   });
 
   const handleAddTestCase = () => {
-    if (testCase.inputs || !testCase.expectedOutput){
+    if (!testCase.inputs || !testCase.expectedOutput){
         alert("Precisa inserir as entradas e saídas")
         returnç
     }

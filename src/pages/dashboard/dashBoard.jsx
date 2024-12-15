@@ -22,6 +22,12 @@ export default function DashBoard(){
         >
           Registrar
         </NavLink>
+        <NavLink
+          className={({isActive}) => isActive ? "btn btn-primary" : "btn btn-secondary"}
+          to="/resultados"
+        >
+          Resultados
+        </NavLink>
       </ButtonGroup>
       <Outlet/>
     </div>

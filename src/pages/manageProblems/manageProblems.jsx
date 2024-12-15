@@ -27,7 +27,7 @@ export default function ManageProblems() {
         throw new Error();
       }
     } catch (error) {
-      notifyError("Erro ao buscar problemas:", error.message);
+      alert(`Erro ao buscar problemas: ${error.message}`);
     } finally {
       setisLoading(false);
     }
@@ -44,7 +44,7 @@ export default function ManageProblems() {
         throw new Error(res.msg)
       }
     } catch (error) {
-      notifyError(error.message);
+      alert(`Erro ao mostrar problema: ${error.message}`);
     } finally {
       setisLoading(false)
     }
@@ -72,7 +72,7 @@ export default function ManageProblems() {
           throw new Error(res.msg)
         }
       } catch (error) {
-        notifyError("Erro ao terminar desafio:", error.message);
+        alert(`Erro ao terminar desafio: ${error.message}`);
       } finally {
         setisLoading(false)
       }

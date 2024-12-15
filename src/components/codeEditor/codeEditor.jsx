@@ -144,7 +144,7 @@ const CodeEditor = () => {
           throw new Error(res.msg);
         }
       } catch (error) {
-        notifyError(error.message);
+        alert(`Erro ao enviar resolução: ${error.message}`);
       } finally {
         setIsLoadingSubmit(false);
       }
@@ -178,7 +178,7 @@ const CodeEditor = () => {
         throw new Error(res.msg);
       }
     } catch (error) {
-      notifyError(error.message);
+      alert(`Erro ao testar código: ${error.message}`);
     } finally {
       setIsLoadingTest(false);
     }

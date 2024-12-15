@@ -1,7 +1,5 @@
 import { createContext, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { ApiServices } from "../utils/apiServices";
-import {notifyError} from '../utils/notifier'
 
 export const AppContext = createContext();
 
@@ -9,7 +7,6 @@ export const AppProvider = ({children}) => {
     const [user, setUser] = useState({})
     const [remainingTime, setRemainingTime] = useState(null);
     const [durationTimeOut, setDurationTimeOut] = useState(false);
-    const navigate = useNavigate()
 
     const handleGetCompetitorInfo = async ()=>{
         try {
@@ -21,7 +18,7 @@ export const AppProvider = ({children}) => {
             throw new Error(res.msg)
           }
         } catch (error) {
-          notifyError(error.message)
+          alert(`Erro ao buscar dados do competidor: ${error.message}`)
       }
     }
 

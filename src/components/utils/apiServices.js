@@ -1,6 +1,6 @@
 import Cookies from "js-cookie";
-//const API_BASE_URL = "http://localhost:8080";
-const API_BASE_URL = "http://54.217.130.114:8080";
+const API_BASE_URL = "http://localhost:8080";
+//const API_BASE_URL = "http://54.217.130.114:8080";
 const response = { ok: false, msg: "" };
 
 export const ApiServices = {

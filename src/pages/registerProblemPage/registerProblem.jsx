@@ -58,7 +58,7 @@ export default function RegisterProblem(){
           throw new Error(res.msg)
         }
     } catch (error) {
-        notifyError(error.message)
+        alert(`Erro ao registrar problema: ${error.message}`)
     }finally{
         setIsLoading(false)
     }

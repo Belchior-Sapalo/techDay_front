@@ -60,22 +60,27 @@ export default function Problems() {
         if (!started) {
           const verifyFirstRes =
             await ApiServices.handleCheckIfFirstProblemIsVisible();
+            console.log("Primeiro problema verificado:", verifyFirstRes);
           if (verifyFirstRes.ok) {
             await handleGetNextProblem();
             setIsChecking(false);
           }
         } else {
+          console.log("Verificando o próximo problema...");
           const verifyNextRes =
             await ApiServices.handleCheckIfNextProblemIsReady();
+            console.log("Próximo problema verificado:", verifyNextRes);
           if (verifyNextRes.ok) {
             await handleGetNextProblem();
             setIsChecking(false);
-          }
-          const challengeStatus =
-            await ApiServices.handleCheckIfChalangeIsFinished();
-          if (challengeStatus.finished === true) {
-            finalizeChallenge();
-            return;
+          } else {
+            console.log("Verificando se o desafio foi finalizado...");
+            const challengeFinished = await checkChallengeStatus();
+              console.log("Status do desafio:", challengeFinished);
+            if (challengeFinished) {
+              finalizeChallenge();
+              return;
+            }
           }
         }
       } catch (error) {
@@ -86,6 +91,18 @@ export default function Problems() {
     return () => clearInterval(intervalId);
   }, [isChecking, checkInterval, started, finished]);
 
+  const checkChallengeStatus = async () => {
+    try {
+      const challengeStatus = await ApiServices.handleCheckIfChalangeIsFinished();
+      console.log("Status do desafio:", challengeStatus);
+      return challengeStatus.ok && challengeStatus.finished === true;
+    } catch (error) {
+      console.error("Erro ao verificar status do desafio:", error);
+      return false;
+    }
+  };
+  
+
   async function handleGetNextProblem() {
     try {
       setIsLoading(true);
@@ -93,13 +110,9 @@ export default function Problems() {
       const res = await ApiServices.handleGetNextProblem();
       if (res.ok) {
         setCurrentProblem(res.problem);
-        Cookies.set("currentProblemObj", res.problem);
-        Cookies.set("currentProblem", res.problem.sequence);
-        Cookies.set("currentProblemId", res.problem.id);
-
+        utilConfigureCookies(res)
         await fetchTimeLeftFromApi(res.problem.id);
 
-        Cookies.remove("sent");
         setStarted(true);
         setIsTimeExpired(false);
         Cookies.set("started", "true");
@@ -113,6 +126,15 @@ export default function Problems() {
     } finally {
       setIsLoading(false);
     }
+  }
+
+  function utilConfigureCookies(res) {
+    Cookies.set("currentProblemObj", res.problem);
+    Cookies.set("currentProblem", res.problem.sequence);
+    Cookies.set("currentProblemId", res.problem.id);
+    Cookies.set("started", "true");
+    Cookies.set("finished", "false");
+    Cookies.set("sent", "false");
   }
 
   async function fetchTimeLeftFromApi(problemId) {
@@ -136,7 +158,7 @@ export default function Problems() {
     setIsTimeExpired(true);
     notifyError("O tempo acabou!");
     setRemainingTime(0);
-    Cookies.remove("sent");
+    Cookies.set("sent", "false");
   }
 
   function handleResetAllCookies() {

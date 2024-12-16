@@ -111,23 +111,22 @@ const CodeEditor = () => {
   };
 
   async function handleSubmitCode() {
-    // if (isTimeExpired === true) {
-    //   notifyError("Seu tempo acabou!");
-    //   return;
-    // }
+    if (isTimeExpired === true) {
+      notifyError("Seu tempo acabou!");
+      return;
+    }
     if (requestBody.codeBody.length === 0) {
       notifyError("Insira o código!");
       return;
     }
-    if (requestBody.language.length == 0) {
+    if (requestBody.language.length === 0) {
       notifyError("Seleccione uma linguagem!");
       return;
     }
-    // if (Cookies.get("sent")) {
-    //   notifyError("Já enviou sua solução!");
-    //   return;
-    // }
-
+    if (Cookies.get("sent") === "true") {
+      notifyError("Já enviou sua solução!");
+      return;
+    }
     if (wasClicked) {
       try {
         setIsLoadingSubmit(true);
@@ -138,7 +137,7 @@ const CodeEditor = () => {
           setIsAnTestResponse(false);
           handleShow();
           handleGetCompetitorInfo();
-          Cookies.set("sent", true);
+          Cookies.set("sent", "true");
         } else {
           throw new Error(res.msg);
         }

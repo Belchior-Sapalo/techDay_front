@@ -8,14 +8,14 @@ function ModalComponent({ response, show, handleClose, isAnTestResponse }) {
   return (
     <>
       {isAnTestResponse ? (
-        <Modal size="lg" show={show} onHide={handleClose}>
+        <Modal size="lg"  show={show} onHide={handleClose}>
           <Modal.Header closeButton>
             <Modal.Title>Resultados do teste</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             {response.result.split("\n").map((part, index) => (
               <React.Fragment key={index}>
-                {part}
+                <h6>{part}</h6>
                 <br />
               </React.Fragment>
             ))}

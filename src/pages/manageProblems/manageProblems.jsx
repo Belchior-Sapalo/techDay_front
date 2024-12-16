@@ -66,6 +66,7 @@ export default function ManageProblems() {
         const res = await ApiServices.handleFinishChalange()
         if (res.ok) {
          await fetchProblems()
+          Cookies.set("finished", true)
          notifySuccess("Desafio terminado")
          setRemainingTime(null)
         }else{
@@ -85,7 +86,8 @@ export default function ManageProblems() {
   async function handleGetCurrentProblem(){
     const res = await ApiServices.handleGetNextProblem();
       if (res.ok) {
-        setRemainingTime(res.problem.durationTime * 60);
+        const response = await ApiServices.handleGetTimeLeft(res.problem.id)
+        setRemainingTime(response.timeLeftInSeconds);
       } else {
         Cookies.remove("currentProblem");
       }

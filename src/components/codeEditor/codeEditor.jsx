@@ -36,8 +36,7 @@ const CodeEditor = () => {
   const {
     handleGetCompetitorInfo,
     setRemainingTime,
-    durationTimeOut,
-    setDurationTimeOut,
+    isTimeExpired,
   } = useContext(AppContext);
   const [wasClicked, setWasClicked] = useState(false);
 
@@ -112,10 +111,10 @@ const CodeEditor = () => {
   };
 
   async function handleSubmitCode() {
-    if (durationTimeOut === true) {
-      notifyError("Seu tempo acabou!");
-      return;
-    }
+    // if (isTimeExpired === true) {
+    //   notifyError("Seu tempo acabou!");
+    //   return;
+    // }
     if (requestBody.codeBody.length === 0) {
       notifyError("Insira o código!");
       return;
@@ -124,10 +123,10 @@ const CodeEditor = () => {
       notifyError("Seleccione uma linguagem!");
       return;
     }
-    if (Cookies.get("sent")) {
-      notifyError("Já enviou sua solução!");
-      return;
-    }
+    // if (Cookies.get("sent")) {
+    //   notifyError("Já enviou sua solução!");
+    //   return;
+    // }
 
     if (wasClicked) {
       try {
@@ -193,10 +192,7 @@ const CodeEditor = () => {
   function disableButton() {
     return (
       isLoadingTest ||
-      isLoadingSubmit ||
-      Cookies.get("currentProblem") === null ||
-      requestBody.codeBody.length === 0 ||
-      durationTimeOut
+      isLoadingSubmit 
     );
   }
 
@@ -218,7 +214,6 @@ const CodeEditor = () => {
       </Form>
       <div id="code-editor-header">
         <Form.Select
-          disabled={durationTimeOut}
           id="select"
           onChange={handleLanguageChange}
         >

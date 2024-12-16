@@ -151,6 +151,7 @@ export const ApiServices = {
     });
 
     const data = await res.json();
+    console.log(data)
     if (res.ok) {
       response.ok = true;
       response.problemList = data;
@@ -178,8 +179,46 @@ export const ApiServices = {
     }
     return response;
   },
+  handleGetTimeLeft: async (problemId) => {
+    const url = `${API_BASE_URL}/problems/${problemId}/time-left`;
+
+    const res = await fetch(url, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${Cookies.get("token")}`,
+      },
+    })
+    const data = await res.json()
+    if (res.ok){
+      response.ok = true
+      response.timeLeftInSeconds = data.body.timeLeftInSeconds
+    }else{
+      response.ok = false
+      response.msg = data.message
+    }
+    return response;
+  },
   handleGetNextProblem: async ()  => {
     const url = `${API_BASE_URL}/problems/next`;
+
+    const res = await fetch(url, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${Cookies.get("token")}`,
+      },
+    })
+    const data = await res.json()
+    if (res.ok){
+      response.ok = true
+      response.problem = data 
+    }else{
+      response.ok = false
+      response.msg = data.message
+    }
+    return response;
+  },
+  handleGetCurrentProblem: async ()  => {
+    const url = `${API_BASE_URL}/problems/${Cookies.get("currentProblemId")}`;
 
     const res = await fetch(url, {
       method: "GET",
@@ -222,7 +261,6 @@ export const ApiServices = {
          Authorization: `Bearer ${Cookies.get("token")}`,
        },
      })
-
      if (res.ok){
        response.ok = true
      }else{

@@ -6,7 +6,7 @@ export const AppContext = createContext();
 export const AppProvider = ({children}) => {
     const [user, setUser] = useState({})
     const [remainingTime, setRemainingTime] = useState(null);
-    const [durationTimeOut, setDurationTimeOut] = useState(false);
+    const [isTimeExpired, setIsTimeExpired] = useState(false);
 
     const handleGetCompetitorInfo = async ()=>{
         try {
@@ -23,7 +23,7 @@ export const AppProvider = ({children}) => {
     }
 
     return (
-        <AppContext.Provider value={{handleGetCompetitorInfo, user, remainingTime, setRemainingTime, durationTimeOut, setDurationTimeOut}}>
+        <AppContext.Provider value={{handleGetCompetitorInfo, user, remainingTime, setRemainingTime, isTimeExpired, setIsTimeExpired}}>
             {children}
         </AppContext.Provider>
     )

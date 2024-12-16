@@ -8,13 +8,14 @@ import { ApiServices } from "../utils/apiServices";
 import { AppContext } from "../context/appContext";
 import { useNavigate } from "react-router-dom";
 import { notifyError } from "../utils/notifier";
-import './problems.css'
+import "./problems.css";
 
 export default function Problems() {
-  const { setRemainingTime, remainingTime, setDurationTimeOut } =
+  const { setRemainingTime, remainingTime, setIsTimeExpired } =
     useContext(AppContext);
-  const [started, setStarted] = useState(false);
-  const [finished, setFinished] = useState(false);
+
+  const [started, setStarted] = useState(Cookies.get("started") === "true");
+  const [finished, setFinished] = useState(Cookies.get("finished") === "true");
   const [checkInterval, setCheckInterval] = useState(1000);
   const [isChecking, setIsChecking] = useState(false);
   const [currentProblem, setCurrentProblem] = useState(null);
@@ -23,92 +24,143 @@ export default function Problems() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    let timeoutId;
-    if (started) {
-      timeoutId = setTimeout(() => {
-        setCheckInterval(1000);
-        setIsChecking(true);
-      }, remainingTime * 1000);
+    if (Cookies.get("started") === "true") {
+      handleGetCurrentProblem();
+    }
+  }, []);
 
+  async function handleGetCurrentProblem() {
+    const res = await ApiServices.handleGetCurrentProblem();
+    if (res.ok) {
+      setCurrentProblem(res.problem);
+      await fetchTimeLeftFromApi(res.problem.id);
+    }
+  }
+
+  useEffect(() => {
+    //Cookies.set("finished", "false")
+    if (remainingTime > 0) {
+      const timeoutId = setTimeout(() => {
+        setIsChecking(true);
+        setCheckInterval(1000);
+      }, remainingTime * 1000);
       setIsChecking(false);
+      return () => clearTimeout(timeoutId);
     } else {
       setCheckInterval(1000);
       setIsChecking(true);
     }
-
-    return () => clearTimeout(timeoutId);
-  }, [started, remainingTime]);
+  }, [remainingTime, isChecking]);
 
   useEffect(() => {
-    if (!isChecking) return;
-    if (finished) return;
+    if (!isChecking || finished) return;
 
     const intervalId = setInterval(async () => {
       try {
-        let res;
         if (!started) {
-          res = await ApiServices.handleCheckIfFirstProblemIsVisible();
-        } else {
-            res = await ApiServices.handleCheckIfNextProblemIsReady();
-          
-            const response = await ApiServices.handleCheckIfChalangeIsFinished();
-          
-            if (response.finished) {
-              navigate("/resultados");
-            }
-          }
-
-        if (res.ok) {
-          handleGetNextProblem();
-
-          if (started) {
+          const verifyFirstRes =
+            await ApiServices.handleCheckIfFirstProblemIsVisible();
+          if (verifyFirstRes.ok) {
+            await handleGetNextProblem();
             setIsChecking(false);
+          }
+        } else {
+          const verifyNextRes =
+            await ApiServices.handleCheckIfNextProblemIsReady();
+          if (verifyNextRes.ok) {
+            await handleGetNextProblem();
+            setIsChecking(false);
+          }
+          const challengeStatus =
+            await ApiServices.handleCheckIfChalangeIsFinished();
+          if (challengeStatus.finished === true) {
+            finalizeChallenge();
+            return;
           }
         }
       } catch (error) {
-        notifyError(error);
+        notifyError(error.message || "Erro ao verificar o status do desafio.");
       }
     }, checkInterval);
 
     return () => clearInterval(intervalId);
-  }, [checkInterval, isChecking, started, finished]);
+  }, [isChecking, checkInterval, started, finished]);
+
   async function handleGetNextProblem() {
     try {
       setIsLoading(true);
+
       const res = await ApiServices.handleGetNextProblem();
       if (res.ok) {
         setCurrentProblem(res.problem);
+        Cookies.set("currentProblemObj", res.problem);
         Cookies.set("currentProblem", res.problem.sequence);
         Cookies.set("currentProblemId", res.problem.id);
-        setRemainingTime((res.problem.durationTime) * 60);
+
+        await fetchTimeLeftFromApi(res.problem.id);
+
         Cookies.remove("sent");
         setStarted(true);
-        setDurationTimeOut(false);
-        Cookies.set("started", true);
+        setIsTimeExpired(false);
+        Cookies.set("started", "true");
+        Cookies.set("finished", "false");
       } else {
         setCurrentProblem(null);
         Cookies.remove("currentProblem");
-        Cookies.set("currentProblemId", res.problem.id);
       }
+    } catch (error) {
+      notifyError("Erro ao buscar o próximo problema.");
     } finally {
       setIsLoading(false);
     }
+  }
+
+  async function fetchTimeLeftFromApi(problemId) {
+    try {
+      const res = await ApiServices.handleGetTimeLeft(problemId);
+      if (res.ok) {
+        setRemainingTime(res.timeLeftInSeconds);
+      } else {
+        throw new Error(res.msg);
+      }
+    } catch (error) {
+      if (error.response?.status === 403) {
+        handleTimeExpired();
+      } else {
+        notifyError("Erro ao obter o tempo restante.");
+      }
+    }
+  }
+
+  function handleTimeExpired() {
+    setIsTimeExpired(true);
+    notifyError("O tempo acabou!");
+    setRemainingTime(0);
+    Cookies.remove("sent");
+  }
+
+  function handleResetAllCookies() {
+    Cookies.set("finished", "true");
+    Cookies.remove("currentProblem");
+    Cookies.remove("currentProblemId");
+    Cookies.set("started", "false");
+  }
+
+  function finalizeChallenge() {
+    handleResetAllCookies();
+    navigate("/resultados");
+    setIsChecking(false);
   }
 
   return (
     <div className="problem-container">
       <Card id="problem-card">
         <Card.Header className="card-header">
-          {isLoading ? (
-            <></>
-          ) : currentProblem != null ? (
+          {isLoading ? null : currentProblem ? (
             <h4 className="problem-sequence">
               Problema: {currentProblem.sequence}
             </h4>
-          ) : (
-            <></>
-          )}
-
+          ) : null}
           <button
             variant="secondary"
             onClick={() => setIsMinimized(!isMinimized)}
@@ -118,28 +170,26 @@ export default function Problems() {
           </button>
         </Card.Header>
         {!isMinimized && (
-          <>
-            <Card.Body>
-              {isLoading ? (
-                <LoadingComponent operation="Carregando problema..." />
-              ) : currentProblem !== null ? (
-                <div>
-                  <h6>{currentProblem.title}</h6>
-                  <p className="problem-description">
-                    {currentProblem.description}
-                  </p>
-                </div>
-              ) : (
-                <div>
-                  {Cookies.get("started") ? (
-                    <h6>Parabéns por completar o desafio!</h6>
-                  ) : (
-                    <h6>Se prepare, logo começamos!</h6>
-                  )}
-                </div>
-              )}
-            </Card.Body>
-          </>
+          <Card.Body>
+            {isLoading ? (
+              <LoadingComponent operation="Carregando problema..." />
+            ) : currentProblem ? (
+              <div>
+                <h6>{currentProblem.title}</h6>
+                <p className="problem-description">
+                  {currentProblem.description}
+                </p>
+              </div>
+            ) : (
+              <div>
+                {finished ? (
+                  <h6>Parabéns por completar o desafio!</h6>
+                ) : (
+                  <h6>Se prepare, logo começamos!</h6>
+                )}
+              </div>
+            )}
+          </Card.Body>
         )}
       </Card>
     </div>

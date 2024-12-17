@@ -5,6 +5,7 @@ import { notifyError, notifySuccess } from "../../components/utils/notifier";
 import Timer from '../../components/timer/timer'
 import { AppContext } from "../../components/context/appContext";
 import Cookies from "js-cookie";
+import { useNavigate } from "react-router-dom";
 
 export default function ManageProblems() {
   const [problems, setProblems] = useState([]);
@@ -12,6 +13,7 @@ export default function ManageProblems() {
   const [wasClicked, setWasClicked] = useState(false);
   const { setRemainingTime } =
     useContext(AppContext);
+    const navigate = useNavigate();
 
   useEffect(() => {
     fetchProblems();
@@ -49,6 +51,20 @@ export default function ManageProblems() {
       setisLoading(false)
     }
   };
+
+  async function handleDeleteProblem(id){
+    try {
+      const res = await ApiServices.handleDeleteProblem(id)
+
+      if (res.ok){
+        fetchProblems()
+      }else{
+        throw new Error(res.msg)
+      }
+    } catch (error) {
+      alert(error.message)
+    }
+  }
 
   if (isLoading) {
     return (
@@ -130,6 +146,22 @@ export default function ManageProblems() {
                     Mostrar
                   </Button>
                 )}
+                <Button
+                    variant="primary"
+                    className="mt-2"
+                    onClick={() => navigate(`/editar?q=${problem.id}`)}
+                    disabled={isLoading}
+                  >
+                    Editar
+                  </Button>
+                  <Button
+                    variant="danger"
+                    className="mt-2"
+                    onClick={() => handleDeleteProblem(problem.id)}
+                    disabled={isLoading}
+                  >
+                    Eliminar
+                  </Button>
               </td>
             </tr>
           ))}

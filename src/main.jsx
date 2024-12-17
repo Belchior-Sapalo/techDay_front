@@ -13,6 +13,7 @@ import AdminRoute from './components/privateRoute/adminRoute';
 import RegisterProblem from './pages/registerProblemPage/registerProblem';
 import ManageProblems from './pages/manageProblems/manageProblems';
 import ChallengeResults from './pages/resultsPage/results';
+import EditProblem from './pages/editProblem/editProblem';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -26,6 +27,7 @@ createRoot(document.getElementById('root')).render(
               <Route path='manageProblems' index element={<AdminRoute><ManageProblems/></AdminRoute>}/>
           </Route>
           <Route path="/codingPage" element={<PrivateRoute><CoderPage/></PrivateRoute>}/>
+          <Route path="/editar" element={<AdminRoute><EditProblem/></AdminRoute>}/>
           <Route path="/resultados" element={<PrivateRoute><ChallengeResults/></PrivateRoute>}/>
           <Route path="/serverError" element={<ServerErrorPage/>}/>
         </Route>

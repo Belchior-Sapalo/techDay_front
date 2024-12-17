@@ -60,7 +60,7 @@ export default function Problems() {
         if (!started) {
           const verifyFirstRes =
             await ApiServices.handleCheckIfFirstProblemIsVisible();
-            console.log("Primeiro problema verificado:", verifyFirstRes);
+          console.log("Primeiro problema verificado:", verifyFirstRes);
           if (verifyFirstRes.ok) {
             await handleGetNextProblem();
             setIsChecking(false);
@@ -69,14 +69,14 @@ export default function Problems() {
           console.log("Verificando o próximo problema...");
           const verifyNextRes =
             await ApiServices.handleCheckIfNextProblemIsReady();
-            console.log("Próximo problema verificado:", verifyNextRes);
+          console.log("Próximo problema verificado:", verifyNextRes);
           if (verifyNextRes.ok) {
             await handleGetNextProblem();
             setIsChecking(false);
           } else {
             console.log("Verificando se o desafio foi finalizado...");
             const challengeFinished = await checkChallengeStatus();
-              console.log("Status do desafio:", challengeFinished);
+            console.log("Status do desafio:", challengeFinished);
             if (challengeFinished) {
               finalizeChallenge();
               return;
@@ -93,7 +93,8 @@ export default function Problems() {
 
   const checkChallengeStatus = async () => {
     try {
-      const challengeStatus = await ApiServices.handleCheckIfChalangeIsFinished();
+      const challengeStatus =
+        await ApiServices.handleCheckIfChalangeIsFinished();
       console.log("Status do desafio:", challengeStatus);
       return challengeStatus.ok && challengeStatus.finished === true;
     } catch (error) {
@@ -101,7 +102,6 @@ export default function Problems() {
       return false;
     }
   };
-  
 
   async function handleGetNextProblem() {
     try {
@@ -110,7 +110,7 @@ export default function Problems() {
       const res = await ApiServices.handleGetNextProblem();
       if (res.ok) {
         setCurrentProblem(res.problem);
-        utilConfigureCookies(res)
+        utilConfigureCookies(res);
         await fetchTimeLeftFromApi(res.problem.id);
 
         setStarted(true);
@@ -199,12 +199,12 @@ export default function Problems() {
               <div>
                 <h6>{currentProblem.title}</h6>
                 <p className="problem-description">
-                {currentProblem.description.split("\n").map((part, index) => (
-              <React.Fragment key={index}>
-                <h6>{part}</h6>
-                <br />
-              </React.Fragment>
-            ))}
+                  {currentProblem.description.split("\n").map((part, index) => (
+                    <React.Fragment key={index}>
+                      <h6>{part}</h6>
+                      <br />
+                    </React.Fragment>
+                  ))}
                 </p>
               </div>
             ) : (

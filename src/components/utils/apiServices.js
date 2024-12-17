@@ -200,6 +200,61 @@ export const ApiServices = {
 
     return response;
   },
+  handleUpdateProblem: async (problem, id) => {
+    const url = `${API_BASE_URL}/problems/updateProblem/${id}`;
+    const response = { ok: false, msg: "" };
+
+    try {
+      const res = await fetch(url, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${Cookies.get("token")}`,
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify(problem),
+      });
+
+      if (res.ok) {
+        response.ok = true;
+      } else {
+        const data = await res.json();
+        response.ok = false;
+        response.msg = data.message;
+      }
+    } catch (error) {
+      response.ok = false;
+      response.msg = "Erro ao conectar com o servidor.";
+      console.error("Error in handleUpdateProblem:", error);
+    }
+
+    return response;
+  },
+  handleDeleteProblem: async (id) => {
+    const url = `${API_BASE_URL}/problems/delete/${id}`;
+    const response = { ok: false, msg: "" };
+    try {
+      const res = await fetch(url, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${Cookies.get("token")}`
+        }
+      });
+
+      if (res.ok) {
+        response.ok = true;
+      } else {
+        const data = await res.json();
+        response.ok = false;
+        response.msg = data.message;
+      }
+    } catch (error) {
+      response.ok = false;
+      response.msg = "Erro ao conectar com o servidor.";
+      console.error("Error in handleDeleteProblem:", error);
+    }
+
+    return response;
+  },
   handleGetProblemList: async () => {
     const url = `${API_BASE_URL}/problems`;
     const response = { ok: false, msg: "" };
@@ -315,8 +370,8 @@ export const ApiServices = {
     return response;
   },
   
-  handleGetCurrentProblem: async () => {
-    const url = `${API_BASE_URL}/problems/${Cookies.get("currentProblemId")}`;
+  handleGetCurrentProblem: async (problemId) => {
+    const url = problemId ? `${API_BASE_URL}/problems/${problemId}` : `${API_BASE_URL}/problems/${Cookies.get("currentProblemId")}`;
     const response = { ok: false, msg: "" };
   
     try {

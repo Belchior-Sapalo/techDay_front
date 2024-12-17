@@ -25,7 +25,7 @@ export default function EditProblem(){
 
   useEffect(()=>{
     getRequiredProblem()
-  },[])
+  },[id])
 
   async function getRequiredProblem(){
     try {
@@ -53,16 +53,6 @@ export default function EditProblem(){
     setTestCase({ inputs: "", expectedOutput: "" });
   };
 
-  function handleCleanStates(){
-    setProblem({
-      title: "",
-      description: "",
-      sequence: "",
-      points: "",
-      durationTime: "",
-      testCases: [],
-    })
-  }
 
   const handleUpdateProblem = async (e) => {
     e.preventDefault();
@@ -87,8 +77,18 @@ export default function EditProblem(){
     }
   };
 
-  function handleClearTestCases(){
-    setProblem({...problem, testCase: []})
+  async function handleDeleteProblemTestCases(){
+    try {
+      const res = await ApiServices.handleDeleteProblemTestCases(id)
+
+      if (res.ok){
+        setProblem({...problem, testCases: []})
+      }else{
+        throw new Error(res.msg)
+      }
+    } catch (error) {
+      alert(error.message)
+    }
   }
 
   return (
@@ -214,7 +214,7 @@ export default function EditProblem(){
                   {isLoading ? "Aguarde..." : "Atualizar Problema"}
                 </Button>
               </Form>
-                <Button onClick={() => handleClearTestCases()} disabled={isLoading} className="mt-2" variant="primary" type="text">
+                <Button onClick={() => handleDeleteProblemTestCases()} disabled={isLoading} className="mt-2" variant="primary" type="text">
                   Limpar casos de testes
                 </Button>
             </Card.Body>

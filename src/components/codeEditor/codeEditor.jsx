@@ -123,10 +123,10 @@ const CodeEditor = () => {
       notifyError("Seleccione uma linguagem!");
       return;
     }
-    if (Cookies.get("sent") === "true") {
-      notifyError("Já enviou sua solução!");
-      return;
-    }
+    // if (Cookies.get("sent") === "true") {
+    //   notifyError("Já enviou sua solução!");
+    //   return;
+    // }
     if (wasClicked) {
       try {
         setIsLoadingSubmit(true);
@@ -137,7 +137,7 @@ const CodeEditor = () => {
           setIsAnTestResponse(false);
           handleShow();
           handleGetCompetitorInfo();
-          Cookies.set("sent", "true");
+          //Cookies.set("sent", "true");
         } else {
           throw new Error(res.msg);
         }
@@ -170,6 +170,7 @@ const CodeEditor = () => {
       if (res.ok) {
         setResponse(res.resObj);
         Cookies.set("lastMsg", res.resObj.result);
+        console.log("result:" + res.resObj.result)
         setIsAnTestResponse(true);
         handleShow();
       } else {

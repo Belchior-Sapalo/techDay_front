@@ -199,7 +199,12 @@ export default function Problems() {
               <div>
                 <h6>{currentProblem.title}</h6>
                 <p className="problem-description">
-                  {currentProblem.description}
+                {currentProblem.description.split("\n").map((part, index) => (
+              <React.Fragment key={index}>
+                <h6>{part}</h6>
+                <br />
+              </React.Fragment>
+            ))}
                 </p>
               </div>
             ) : (

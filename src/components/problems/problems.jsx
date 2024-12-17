@@ -60,23 +60,23 @@ export default function Problems() {
         if (!started) {
           const verifyFirstRes =
             await ApiServices.handleCheckIfFirstProblemIsVisible();
-          console.log("Primeiro problema verificado:", verifyFirstRes);
+          //console.log("Primeiro problema verificado:", verifyFirstRes);
           if (verifyFirstRes.ok) {
             await handleGetNextProblem();
             setIsChecking(false);
           }
         } else {
-          console.log("Verificando o próximo problema...");
+          //console.log("Verificando o próximo problema...");
           const verifyNextRes =
             await ApiServices.handleCheckIfNextProblemIsReady();
-          console.log("Próximo problema verificado:", verifyNextRes);
+          //console.log("Próximo problema verificado:", verifyNextRes);
           if (verifyNextRes.ok) {
             await handleGetNextProblem();
             setIsChecking(false);
           } else {
-            console.log("Verificando se o desafio foi finalizado...");
+            //console.log("Verificando se o desafio foi finalizado...");
             const challengeFinished = await checkChallengeStatus();
-            console.log("Status do desafio:", challengeFinished);
+            //console.log("Status do desafio:", challengeFinished);
             if (challengeFinished) {
               finalizeChallenge();
               return;
